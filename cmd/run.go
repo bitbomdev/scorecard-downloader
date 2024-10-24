@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -12,7 +13,7 @@ import (
 func Run(c *cli.Context) error {
 	purls := c.StringSlice("purls")
 	purlsFile := c.String("purls-file")
-	outputZip := c.String("output")
+	outputFile := c.String("output")
 
 	if len(purls) == 0 && purlsFile == "" {
 		return fmt.Errorf("either --purls or --purls-file must be provided")
@@ -28,16 +29,27 @@ func Run(c *cli.Context) error {
 
 	log.Printf("Input PURLs: %v", purls)
 
-	p := processor.NewProcessor()
+	useBigQuery := c.Bool("use-bigquery")
+	credentialsFile := c.String("credentials-file")
+
+	p := processor.NewProcessor(useBigQuery, credentialsFile)
 	results, err := p.Process(purls)
 	if err != nil {
 		return fmt.Errorf("error processing scorecard: %v", err)
 	}
 
-	if err := utils.SaveResultsToZip(results, outputZip); err != nil {
-		return fmt.Errorf("error saving results to zip: %v", err)
+	jsonData, err := json.MarshalIndent(results, "", "  ")
+	if err != nil {
+		return fmt.Errorf("error marshaling results to JSON: %v", err)
+	}
+	if outputFile != "" {
+		if err := utils.SaveJSONToFile(jsonData, outputFile); err != nil {
+			return fmt.Errorf("error saving results to file: %v", err)
+		}
+		fmt.Printf("Results saved to %s\n", outputFile)
+	} else {
+		fmt.Println(string(jsonData))
 	}
 
-	fmt.Printf("Results saved to %s\n", outputZip)
 	return nil
 }

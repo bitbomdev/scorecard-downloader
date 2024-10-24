@@ -25,8 +25,16 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:  "output",
-				Usage: "Output zip file name (default: results.zip)",
-				Value: "results.zip",
+				Usage: "Output file name (default: results.json)",
+				Value: "results.json",
+			},
+			&cli.BoolFlag{
+				Name:  "use-bigquery",
+				Usage: "Use BigQuery instead of the Scorecard API",
+			},
+			&cli.StringFlag{
+				Name:  "credentials-file",
+				Usage: "Path to the BigQuery credentials file",
 			},
 		},
 		Action: cmd.Run,

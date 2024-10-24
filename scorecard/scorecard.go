@@ -7,26 +7,29 @@ import (
 	"net/http"
 )
 
+type Repo struct {
+	Name   string `json:"name"`
+	Commit string `json:"commit"`
+}
+
+type Scorecard struct {
+	Version string `json:"version"`
+	Commit  string `json:"commit"`
+}
+
 type ScorecardData struct {
-	Date string `json:"date"`
-	Repo struct {
-		Name   string `json:"name"`
-		Commit string `json:"commit"`
-	} `json:"repo"`
-	Scorecard struct {
-		Version string `json:"version"`
-		Commit  string `json:"commit"`
-	} `json:"scorecard"`
-	Score  float64 `json:"score"`
-	Checks []Check
+	Date      string    `json:"date"`
+	Repo      Repo      `json:"repo"`
+	Scorecard Scorecard `json:"scorecard"`
+	Score     float64   `json:"score"`
+	Checks    []Check
+	PURL      string `json:"purl"`
 }
 
 type Check struct {
-	Name     string
-	Score    int
-	Reason   string
-	DocShort string
-	DocURL   string
+	Name   string
+	Score  int
+	Reason string
 }
 
 func GetScorecardDataFromAPI(owner, repo, scorecardAPI string) (*ScorecardData, error) {

@@ -43,8 +43,8 @@ func SaveResultsToZip(results []processor.Result, outputZip string) error {
 
 	fileCount := 0
 	for _, result := range results {
-		if !result.Success || result.Data == nil {
-			log.Printf("Skipping result for PURL %s: success=%v, data=%v", result.PURL, result.Success, result.Data != nil)
+		if !result.Success || result.Scorecard == nil {
+			log.Printf("Skipping result for PURL %s: success=%v, data=%v", result.PURL, result.Success, result.Scorecard != nil)
 			continue
 		}
 
@@ -56,7 +56,7 @@ func SaveResultsToZip(results []processor.Result, outputZip string) error {
 		}
 
 		var data map[string]interface{}
-		if err := json.Unmarshal(result.Data, &data); err != nil {
+		if err := json.Unmarshal(result.Scorecard, &data); err != nil {
 			return fmt.Errorf("error unmarshaling result data: %v", err)
 		}
 
@@ -87,6 +87,21 @@ func SaveResultsToZip(results []processor.Result, outputZip string) error {
 
 	if _, err := io.Copy(outFile, buf); err != nil {
 		return fmt.Errorf("error writing zip data to file: %v", err)
+	}
+
+	return nil
+}
+
+func SaveJSONToFile(data []byte, filename string) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return fmt.Errorf("error creating output file: %v", err)
+	}
+	defer file.Close()
+
+	_, err = file.Write(data)
+	if err != nil {
+		return fmt.Errorf("error writing JSON data to file: %v", err)
 	}
 
 	return nil
